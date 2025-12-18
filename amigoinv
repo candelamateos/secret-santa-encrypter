@@ -1,0 +1,94 @@
+import random
+from cryptography.fernet import Fernet
+from fpdf import FPDF
+
+# Función para desencriptar
+def desencriptar(encriptado: str, clave: str) -> str:
+    cipher = Fernet(clave.encode())
+    return cipher.decrypt(encriptado.encode()).decode()
+
+# Generar clave de encriptación
+key = Fernet.generate_key()
+cipher = Fernet(key)
+
+# Lista de correos
+correos = [
+    "Blanca D",
+    "Marta",
+    "Pepe",
+    "Elena",
+    "Candela",
+    "Lucia",
+    "Carlos",
+    "Blanca P",
+    "Martina",
+    "Irina"
+]
+
+
+# Crear sorteo (cada persona regala a otra diferente)
+sorteo = correos.copy()
+random.shuffle(sorteo)
+
+# Asegurar que nadie regala a sí mismo
+while any(correos[i] == sorteo[i] for i in range(len(correos))):
+    random.shuffle(sorteo)
+
+"""
+# Encriptar y mostrar resultado
+print("=== SORTEO DE AMIGO INVISIBLE ===\n")
+print(f"Clave de desencriptación: {key.decode()}\n")
+
+for i, persona in enumerate(correos):
+    destinatario = sorteo[i]
+    encriptado = cipher.encrypt(destinatario.encode())
+    print(f"{persona} → {encriptado.decode()}")
+
+print("\n✓ Sorteo completado. Comparte la clave con los participantes.")
+
+for i, persona in enumerate(sorteo):
+    compra = correos[i]
+    print("=== COMPROBACION ===    ")
+    print (compra + " compra para " + persona)
+   
+    destinatario_encriptado = cipher.encrypt(sorteo[i].encode())
+    destinatario_desencriptado = desencriptar(destinatario_encriptado.decode(), key.decode())
+    print(f"{persona} → {destinatario_desencriptado}")
+"""
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Helvetica", size=30)
+pdf.cell(0, 30, txt="SORTEO DE AMIGO INVISIBLE", ln=True, align='C')
+pdf.set_font("Helvetica", size=8)
+#pdf.cell(200, 10, txt=f"Clave de desencriptación: {key.decode()}", ln=True, align='C')
+
+pdf.set_fill_color(255, 176, 124)
+texto = (
+    "Bienvenido al sorteo de amigo invisible!!!! Cada participante recibirá un código que le dirá "
+    "a quién le debe hacer un regalo este 31 de diciembre!!!! Las intrucciones son simples: Pásale al ChatGPT "
+    "tu recuadro verde y la clave que te mande al privado y él te dirá a quién le tienes que comprar el regalo. "
+    "Que disfrutes del juego jjjjjjjjjj Recuerda, nadie debe saber a quién le regala nadie más que tú!!! Y máximo 10 euros :D"
+)
+pdf.multi_cell(0, 8, txt=texto, align='L', border=1, fill=True)
+
+pdf.cell(150, 8, txt="  ", ln=True)
+
+for i, persona in enumerate(correos):
+    destinatario = sorteo[i]
+    encriptado = cipher.encrypt(destinatario.encode())
+
+    
+    pdf.set_font("Helvetica", size=8)
+    pdf.cell(150, 10, txt=f"{persona}", ln=True)
+
+    pdf.set_fill_color(255, 249, 196)
+    pdf.set_font("Courier", 'B', size=8)
+    pdf.cell(180, 20, txt=f"{encriptado.decode()}", border=1, ln=True, fill=True)
+
+    pdf.cell(150, 8, txt="", ln=True)
+
+    pdf.set_font("Helvetica", size=10)
+    
+    #texto = f"{persona} compra para {destinatario}"
+    #pdf.cell(150, 10, txt=texto, ln=True)
+pdf.output("sorteo_amigo_invisible.pdf")
