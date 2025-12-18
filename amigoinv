@@ -33,7 +33,7 @@ random.shuffle(sorteo)
 # Asegurar que nadie regala a sí mismo
 while any(correos[i] == sorteo[i] for i in range(len(correos))):
     random.shuffle(sorteo)
-
+print("Clave de desencriptación:", key.decode())
 """
 # Encriptar y mostrar resultado
 print("=== SORTEO DE AMIGO INVISIBLE ===\n")
